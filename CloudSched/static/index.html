@@ -1,0 +1,170 @@
+<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CloudSched · Resource Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f4f6fb;--surface:#fff;--ink:#0f172a;--mute:#64748b;--line:#e6eaf3;--brand:#2563eb;--soft:#eaf0ff;--green:#059669;--amber:#d97706;--red:#dc2626;--violet:#7c3aed;--teal:#0d9488;--hover:#f8faff;--shadow:0 1px 2px rgba(15,23,42,.05),0 4px 16px rgba(15,23,42,.04)}
+[data-theme=dark]{--bg:#0a1120;--surface:#111b30;--ink:#e7ecf7;--mute:#8d9ab6;--line:#1f2d4a;--brand:#5b95ff;--soft:#172647;--green:#34d399;--amber:#fbbf24;--red:#f87171;--violet:#a78bfa;--teal:#2dd4bf;--hover:#15213a;--shadow:none}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font:14px/1.5 Inter,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.app{display:grid;grid-template-columns:240px 1fr}
+aside{background:#0b1730;color:#a9b6d3;padding:22px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:2px}
+.logo{display:flex;gap:10px;align-items:center;color:#fff;font-size:19px;font-weight:700;padding:0 10px}.logo .i{width:26px;height:26px;color:#5b95ff}
+aside .tag{font-size:12px;padding:6px 10px 20px;line-height:1.4}
+aside a{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:9px;color:inherit;text-decoration:none;font-weight:500}
+aside a:hover{background:#13234a;color:#fff}aside a.on{background:#1d4ed8;color:#fff}
+.foot{margin-top:auto;padding:12px;border-radius:10px;background:#0f2046;font-size:12px}.foot b{color:#fff;display:block}
+.top{position:sticky;top:0;z-index:5;display:flex;gap:12px;align-items:center;padding:14px 28px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.sb{position:relative;flex:1;max-width:380px}.sb .i{position:absolute;left:12px;top:10px;color:var(--mute);width:16px}.sb input{padding-left:36px;width:100%}
+input,select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px 12px}
+button{font:inherit;font-weight:500;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px 14px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+button:hover{background:var(--hover)}button.p{background:var(--brand);border-color:var(--brand);color:#fff}button.p:hover{filter:brightness(1.08)}button:disabled{opacity:.5;cursor:default}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.sp{margin-left:auto;display:flex;gap:10px;align-items:center}
+.live{display:inline-flex;gap:8px;align-items:center;padding:6px 12px;border:1px solid var(--line);border-radius:20px;background:var(--surface);font-weight:500;font-variant-numeric:tabular-nums}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 var(--green);animation:p 1.6s infinite}.paused .pulse{background:var(--amber);animation:none}
+@keyframes p{70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}@media(prefers-reduced-motion:reduce){.pulse{animation:none}}
+.av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:600;flex:none}
+.content{padding:24px 28px 40px;max-width:1500px}.hd h1{margin:0;font-size:24px;letter-spacing:-.02em}.hd p{margin:2px 0 20px;color:var(--mute)}
+.g{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin-top:16px}.s4{grid-column:span 4}.s5{grid-column:span 5}.s7{grid-column:span 7}.s8{grid-column:span 8}.s12{grid-column:span 12}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);min-width:0}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 18px 0}.ch h2{margin:0;font-size:15px;font-weight:600}.ch small{color:var(--mute)}.bd{padding:14px 18px 18px}
+.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px}.k{padding:16px;display:flex;gap:14px;align-items:flex-start}
+.chip{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;flex:none}.k .l{color:var(--mute);font-size:13px}.k .v{font-size:25px;font-weight:700;letter-spacing:-.02em;line-height:1.2}.k .s{font-size:12px;color:var(--mute)}
+.bar{height:6px;background:var(--line);border-radius:4px;overflow:hidden;margin:6px 0}.bar i{display:block;height:100%;border-radius:4px;transition:width .6s}
+.cmp{display:grid;grid-template-columns:1fr 230px;gap:18px}.chart{position:relative;height:230px}
+.rec{background:var(--soft);border-radius:12px;padding:16px}.rec .n{font-size:28px;font-weight:700;color:var(--brand);letter-spacing:-.02em}.rec p{margin:2px 0 10px;color:var(--mute);font-size:12px}
+.sc{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;font-variant-numeric:tabular-nums}.sc.w{font-weight:600;color:var(--brand)}.rec button{width:100%;justify-content:center;margin-top:10px}
+.dn{display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:center}.dw{position:relative;height:124px}.dw b{position:absolute;inset:0;display:grid;place-items:center;font-size:21px;font-weight:700}.dl{font-size:12px;color:var(--mute)}
+.vm{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:12px}.vm div{display:flex;justify-content:space-between}
+.tabs{display:flex;gap:4px;background:var(--bg);padding:3px;border-radius:10px}.tabs button{border:0;background:none;padding:4px 10px;color:var(--mute);font-size:13px}.tabs button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:13px}th{color:var(--mute);font-weight:500;text-align:left;font-size:12px;padding:8px 8px}td{padding:10px 8px;border-top:1px solid var(--line)}tr:hover td{background:var(--hover)}
+.u{display:flex;gap:9px;align-items:center;white-space:nowrap}.pill{display:inline-flex;gap:6px;align-items:center;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:600}.pill:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.running{background:color-mix(in srgb,var(--green) 14%,transparent);color:var(--green)}.waiting{background:color-mix(in srgb,var(--amber) 16%,transparent);color:var(--amber)}.completed{background:color-mix(in srgb,var(--brand) 14%,transparent);color:var(--brand)}.rejected{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red)}
+.pri{font-weight:600}.pri.h{color:var(--red)}.pri.m{color:var(--amber)}.pri.lo{color:var(--mute)}
+.pg{display:flex;gap:6px;align-items:center;margin-top:12px;color:var(--mute);font-size:12px}.pg button{padding:3px 10px;margin-left:0}.pg button.on{background:var(--brand);color:#fff;border-color:var(--brand)}.pg span{margin-right:auto}
+.gl{display:grid;grid-template-columns:48px 1fr;gap:8px 10px;align-items:center;font-size:12px;color:var(--mute)}
+.tr{position:relative;height:28px;border-radius:6px;background:linear-gradient(to right,var(--line) 1px,transparent 1px) 0 0/25% 100%,var(--bg)}
+.tr b{position:absolute;top:3px;height:22px;border-radius:5px;color:#fff;font-size:11px;line-height:22px;text-align:center;overflow:hidden;font-weight:600;transition:width .6s}
+.ax{grid-column:2;display:flex;justify-content:space-between;font-size:11px}
+.tl{position:relative;padding-left:18px}.tl:before{content:"";position:absolute;left:4px;top:6px;bottom:6px;width:2px;background:var(--line)}.tl div{position:relative;padding:5px 0;font-size:13px}.tl i{position:absolute;left:-18px;top:11px;width:10px;height:10px;border-radius:50%;border:2px solid var(--surface)}.tl small{color:var(--mute);display:block}
+.st div{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid var(--line)}.st div:first-child{border:0}.st b{color:var(--green);font-weight:600;display:flex;gap:6px;align-items:center}
+.empty{color:var(--mute);text-align:center;padding:24px 0}.note{display:flex;gap:12px;align-items:center;padding:14px 18px;background:var(--soft);color:var(--ink)}
+#err{display:none;margin-bottom:14px;padding:10px 14px;border-radius:10px;background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red)}
+#toast{position:fixed;right:24px;bottom:24px;display:grid;gap:8px;z-index:20}#toast div{background:#0b1730;color:#fff;padding:10px 16px;border-radius:10px;box-shadow:0 8px 24px #0004}
+dialog{border:1px solid var(--line);border-radius:16px;padding:22px;width:380px;background:var(--surface);color:var(--ink)}dialog::backdrop{background:#0b173099}dialog h3{margin:0 0 4px;font-size:18px}
+dialog label{display:block;margin:12px 0 4px;font-size:12px;font-weight:500;color:var(--mute)}dialog input,dialog select{width:100%}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.acts{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+.top{flex-wrap:wrap}.cores{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:6px}.core{height:38px;border-radius:7px;background:var(--bg);border:1px dashed var(--line);display:grid;place-items:center;font-size:11px;color:var(--mute)}.core.on{border:0;color:#fff;font-weight:600}
+.mem{display:flex;height:28px;background:var(--bg);border-radius:6px;overflow:hidden;margin-top:6px}.mem i{display:grid;place-items:center;color:#fff;font-size:10px;font-style:normal;overflow:hidden;transition:width .5s}
+.qc{display:inline-block;padding:3px 10px;border-radius:14px;background:var(--soft);color:var(--brand);font-size:12px;margin:6px 6px 0 0;font-weight:500}
+.ms{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}.ms div{background:var(--bg);border-radius:10px;padding:10px;color:var(--mute);font-size:12px}.ms b{display:block;font-size:20px;color:var(--ink)}
+.term{background:#0a0f1c;color:#c7d2e8;font:12px/1.6 ui-monospace,Consolas,monospace;border-radius:10px;padding:12px;height:330px;overflow:auto}.term span{color:#5d6b8a}
+.term .admit{color:#4ade80}.term .complete{color:#60a5fa}.term .preempt{color:#fbbf24}.term .deny{color:#f87171}.term .aging{color:#c4b5fd}.term .banker{color:#2dd4bf}.term .spawn{color:#c7d2e8}
+@media(max-width:1150px){.app{grid-template-columns:1fr}aside{display:none}.s4,.s5,.s7,.s8{grid-column:span 12}.cmp{grid-template-columns:1fr}}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="i-cloud" viewBox="0 0 24 24"><path d="M18 10h-1.3A8 8 0 109 20h9a5 5 0 000-10z"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+<symbol id="i-cpu" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></symbol>
+<symbol id="i-vm" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/><path d="M6 7h.01M6 17h.01"/></symbol>
+<symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/></symbol>
+<symbol id="i-sl" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+<symbol id="i-bar" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M6 3l14 9-14 9z"/></symbol><symbol id="i-pause" viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></symbol>
+<symbol id="i-ram" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 11v2M10 11v2M14 11v2M18 11v2"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 2l10 5-10 5L2 7zM2 17l10 5 10-5M2 12l10 5 10-5"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+</defs></svg>
+<div class="app">
+<aside><div class="logo"><svg class="i"><use href="#i-cloud"/></svg>CloudSched</div><div class="tag">Intelligent Cloud Resource Management &amp; Adaptive Job Scheduling</div>
+<a class="on" href="#top"><svg class="i"><use href="#i-grid"/></svg>Dashboard</a><a href="#jobs"><svg class="i"><use href="#i-list"/></svg>Jobs</a><a href="#util"><svg class="i"><use href="#i-cpu"/></svg>Resources</a>
+<a href="#util"><svg class="i"><use href="#i-vm"/></svg>Virtual Machines</a><a href="#cts"><svg class="i"><use href="#i-box"/></svg>Containers</a><a href="#algo"><svg class="i"><use href="#i-sl"/></svg>Algorithms</a><a href="#gantt"><svg class="i"><use href="#i-bar"/></svg>Reports</a>
+<div class="foot"><b>Smarter scheduling</b>for a better cloud</div></aside>
+<div id="top"><div class="top"><div class="sb"><svg class="i"><use href="#i-search"/></svg><input id="search" placeholder="Search jobs, users or status" aria-label="Search jobs"></div>
+<div class="sp"><div class="live" id="live"><i class="pulse"></i><span id="lt">Live</span></div><button id="pp"></button><button id="au"></button><select id="spd" aria-label="Simulation speed"><option value="0.5">0.5x<option value="1">1x<option value="2">2x<option value="4">4x</select>
+<select id="sel" aria-label="Active scheduling algorithm"><option value="FCFS">FCFS<option value="SJF">SJF<option value="PRIORITY">Priority<option value="RR">Round Robin</select>
+<button onclick="post('/api/addvm',{},'VM added')"><svg class="i"><use href="#i-plus"/></svg>Add VM</button><button class="p" onclick="dlg.showModal()"><svg class="i"><use href="#i-plus"/></svg>Submit job</button>
+<button id="th" aria-label="Toggle theme"></button><div class="av" style="background:#2563eb">AR</div></div></div>
+<div class="content"><div class="hd"><h1>Overview</h1><p>Live operating-system simulation: process scheduler, memory manager, hypervisor and containers.</p></div><div id="err">Cannot reach the server. Check that <b>python server.py</b> is still running, then refresh.</div>
+<div class="kp" id="kp"></div>
+<div class="g"><div class="card s8"><div class="ch"><h2>Live machine</h2><small id="mh"></small></div><div class="bd"><div class="dl">CPU cores: each block is one vCPU executing a job</div><div class="cores" id="cores"></div>
+<div class="dl" style="margin-top:14px">Memory map</div><div class="mem" id="mem"></div><div class="dl" style="margin-top:14px">Ready queue (first one is dispatched next)</div><div id="rq"></div><div class="ms" id="ms"></div></div></div>
+<div class="card s4"><div class="ch"><h2>Kernel log</h2><button onclick="post('/api/banker_demo',{},'Banker demo written to the log')">Banker's demo</button></div><div class="bd"><div class="term" id="log"></div></div></div></div>
+<div class="g"><div class="card s7" id="algo"><div class="ch"><h2>Algorithm performance</h2><small>Average time units, lower is better</small></div><div class="bd"><div class="cmp"><div class="chart"><canvas id="cmp"></canvas></div><div class="rec" id="rec"></div></div></div></div>
+<div class="card s5" id="util"><div class="ch"><h2>Resource utilization</h2></div><div class="bd"><div class="dn"><div><div class="dw"><canvas id="dc"></canvas><b id="dct"></b></div><div class="dl" id="dcl"></div></div><div><div class="dw"><canvas id="dr"></canvas><b id="drt"></b></div><div class="dl" id="drl"></div></div></div><div class="vm" id="vms"></div></div></div></div>
+<div class="g"><div class="card s8" id="jobs"><div class="ch"><h2>Job queue</h2><div class="tabs" id="tabs"></div></div><div class="bd" style="overflow-x:auto"><table id="jt"></table><div class="pg" id="pg"></div></div></div>
+<div class="card s4"><div class="ch"><h2>Utilization over time</h2></div><div class="bd"><div class="chart" style="height:260px"><canvas id="ut"></canvas></div></div></div></div>
+<div class="g"><div class="card s8" id="gantt"><div class="ch"><h2>Gantt chart</h2><small>Last 60 seconds, per virtual machine</small></div><div class="bd"><div class="gl" id="gl"></div></div></div>
+<div class="card s4"><div class="ch"><h2>System status</h2></div><div class="bd st" id="st"></div></div></div>
+<div class="g"><div class="card s12" id="cts"><div class="ch"><h2>Containers</h2><small>Isolated, resource-limited runtime per job</small></div><div class="bd" style="overflow-x:auto"><table id="ct"></table></div></div></div>
+<div class="g"><div class="card s12 note"><svg class="i" style="color:var(--brand)"><use href="#i-info"/></svg><span>Banker's Algorithm checks every grant for deadlock safety, and Priority Aging raises the priority of waiting jobs so none starve.</span></div></div>
+</div></div></div>
+<div id="toast"></div>
+<dialog id="dlg"><form method="dialog" onsubmit="submitJob(event)"><h3>Submit new job</h3><small style="color:var(--mute)">It starts as soon as CPU and RAM are free.</small>
+<label>Submitted by</label><select name="user"><option>Apeksha Rawat<option>Piyush Gairola<option>Ajeet Panwar<option>Rudrapratap Bhandari<option>Divyanshi Solanki<option>Devansh Thapliyal</select>
+<label>Job name</label><input name="name" required placeholder="e.g. data-backup">
+<div class="two"><div><label>CPU (vCPU)</label><input name="cpu" type="number" min="1" value="2" required></div><div><label>RAM (MB)</label><input name="ram" type="number" min="1" value="2048" required></div>
+<div><label>Run time (seconds)</label><input name="burst" type="number" min="1" value="10" required></div><div><label>Priority (1 = highest)</label><input name="priority" type="number" min="1" max="10" value="5" required></div></div>
+<div class="acts"><button type="button" onclick="dlg.close()">Cancel</button><button class="p">Submit job</button></div></form></dialog>
+<script>
+const $=id=>document.getElementById(id),ic=n=>`<svg class="i"><use href="#i-${n}"/></svg>`,PAL=['#2563eb','#059669','#7c3aed','#d97706','#0d9488','#db2777','#4f46e5','#64748b'];
+const NAMES={FCFS:'First Come First Served',SJF:'Shortest Job First',PRIORITY:'Priority Scheduling',RR:'Round Robin'};
+let S,page=1,q='',flt='all',cmp,dc,dr,ut,hist=[],best,res=[],lastN=-1;
+const CH=typeof Chart!=='undefined',cs=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function toast(m){const d=document.createElement('div');d.textContent=m;$('toast').appendChild(d);setTimeout(()=>d.remove(),2600)}
+async function post(u,b={},msg){try{const r=await (await fetch(u,{method:'POST',body:JSON.stringify(b)})).json();if(r.error)toast('Error: '+r.error);else{render(r);msg&&toast(msg)}}catch(e){toast('Server not reachable')}}
+function submitJob(e){post('/api/submit',Object.fromEntries(new FormData(e.target)),'Job submitted')}
+$('pp').onclick=()=>post('/api/live',{on:!S.live},S.live?'Paused':'Resumed');$('au').onclick=()=>post('/api/auto',{on:!S.auto},S.auto?'Auto workload off':'Auto workload on');$('spd').onchange=e=>post('/api/speed',{speed:+e.target.value},'Speed '+e.target.value+'x');$('sel').onchange=e=>post('/api/algo',{algo:e.target.value},'Scheduler set to '+e.target.value);
+$('search').oninput=e=>{q=e.target.value.toLowerCase();page=1;render(S)};
+function theme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem('cs-theme',t)}catch(e){}$('th').innerHTML=ic(t=='dark'?'sun':'moon');if(CH){Chart.defaults.color=cs('--mute');Chart.defaults.borderColor=cs('--line');cmp&&cmp.destroy();dc&&dc.destroy();dr&&dr.destroy();ut&&ut.destroy();cmp=dc=dr=ut=null;S&&(render(S),drawCmp())}}
+$('th').onclick=()=>theme(document.documentElement.dataset.theme=='dark'?'light':'dark');
+const gb=m=>Math.round(m/1024*10)/10,lab=p=>p<=3?['High','h']:p<=6?['Medium','m']:['Low','lo'],col=s=>PAL[s.split('').reduce((a,c)=>a+c.charCodeAt(0),0)%8],ini=n=>n.split(' ').map(w=>w[0]).join('').slice(0,2);
+function donut(ch,id,used,total,color){if(!CH)return null;const d={labels:['Used','Free'],datasets:[{data:[used,total-used],backgroundColor:[color,cs('--line')],borderWidth:0}]};
+ if(ch){ch.data=d;ch.update('none');return ch}return new Chart($(id),{type:'doughnut',data:d,options:{cutout:'74%',plugins:{legend:{display:false}},maintainAspectRatio:false,animation:{duration:400}}})}
+function render(s){S=s;const J=s.jobs,R=Object.fromEntries(s.resources.map(r=>[r.name,r])),n=x=>J.filter(j=>j.status==x).length,pc=(u,t)=>Math.round(100*u/t);
+ $('live').className='live'+(s.live?'':' paused');$('lt').textContent=(s.live?'Live':'Paused')+' · t = '+s.clock+'s';$('pp').innerHTML=s.live?ic('pause')+'Pause':ic('play')+'Resume';$('sel').value=s.algo;$('au').innerHTML=ic('plus')+(s.auto?'Auto workload: on':'Auto workload: off');$('spd').value=String(+(1/s.speed).toFixed(1));
+ if(J.length!==lastN){lastN=J.length;drawCmp()}
+ const k=(c,i,l,v,sub,bar)=>`<div class="card k"><div class="chip" style="background:color-mix(in srgb,${c} 14%,transparent);color:${c}">${ic(i)}</div><div style="flex:1"><div class="l">${l}</div><div class="v">${v}</div>${bar!=null?`<div class="bar"><i style="width:${bar}%;background:${c}"></i></div>`:''}<div class="s">${sub}</div></div></div>`;
+ $('kp').innerHTML=k('var(--brand)','layers','Total jobs',J.length,n('rejected')+' rejected')+k('var(--green)','play','Running',n('running'),'on '+s.vms.filter(v=>v.state=='running').length+' VMs')
+  +k('var(--violet)','check','Completed',n('completed'),pc(n('completed'),J.length||1)+'% of all jobs')+k('var(--amber)','clock','Waiting',n('waiting'),'in the ready queue')
+  +k('var(--teal)','cpu','CPU',R.cpu.used+' / '+R.cpu.total,pc(R.cpu.used,R.cpu.total)+'% allocated',pc(R.cpu.used,R.cpu.total))+k('var(--red)','ram','Memory',gb(R.ram.used)+' / '+gb(R.ram.total)+' GB',pc(R.ram.used,R.ram.total)+'% allocated',pc(R.ram.used,R.ram.total));
+ dc=donut(dc,'dc',R.cpu.used,R.cpu.total,cs('--brand'));dr=donut(dr,'dr',R.ram.used,R.ram.total,cs('--violet'));
+ $('dct').textContent=pc(R.cpu.used,R.cpu.total)+'%';$('drt').textContent=pc(R.ram.used,R.ram.total)+'%';$('dcl').textContent=`CPU · ${R.cpu.used} of ${R.cpu.total} vCPU`;$('drl').textContent=`RAM · ${gb(R.ram.used)} of ${gb(R.ram.total)} GB`;
+ $('vms').innerHTML=s.vms.map(v=>`<div><b>VM-${v.id}</b><span>${v.used_cpu}/${v.vcpu} vCPU · ${gb(v.used_ram)}/${gb(v.vram)} GB</span></div><div class="bar"><i style="width:${pc(v.used_cpu,v.vcpu)}%;background:var(--brand)"></i></div>`).join('');
+ const T=[['all','All'],['running','Running'],['waiting','Waiting'],['completed','Done']];$('tabs').innerHTML=T.map(([f,l])=>`<button class="${flt==f?'on':''}" onclick="flt='${f}';page=1;render(S)">${l} ${f=='all'?J.length:n(f)}</button>`).join('');
+ const L=J.filter(j=>(flt=='all'||j.status==flt)&&(!q||(j.name+j.user+j.status).toLowerCase().includes(q))).reverse(),pages=Math.max(1,Math.ceil(L.length/6));page=Math.min(page,pages);
+ $('jt').innerHTML='<tr><th>Job<th>Submitted by<th>Resources<th>Priority<th>Progress<th>Status<th>VM</tr>'+(L.slice((page-1)*6,page*6).map(j=>{const [pl,pk]=lab(j.priority),p=pc(j.burst-j.remaining,j.burst);
+  return `<tr><td><b>J-${j.id}</b> <span style="color:var(--mute)">${j.name}</span><td><div class="u"><div class="av" style="width:24px;height:24px;font-size:10px;background:${col(j.user)}">${ini(j.user)}</div>${j.user}</div><td>${j.cpu} vCPU · ${gb(j.ram)} GB<td><span class="pri ${pk}">${pl}</span> <span style="color:var(--mute)">(${j.priority})</span>
+  <td style="min-width:90px"><div class="bar"><i style="width:${p}%;background:var(--brand)"></i></div><td><span class="pill ${j.status}">${j.status}</span><td>${j.vm_id?'VM-'+j.vm_id:'–'}</tr>`}).join('')||'<tr><td colspan=7 class="empty">No jobs match. Submit a job to get started.</tr>');
+ $('pg').innerHTML=`<span>Showing ${Math.min(6,L.length)} of ${L.length} jobs</span>`+Array.from({length:pages},(_,i)=>`<button class="${i+1==page?'on':''}" onclick="page=${i+1};render(S)">${i+1}</button>`).join('');
+ const lo=Math.max(0,s.clock-60),span=Math.max(s.clock-lo,10);$('gl').innerHTML=s.vms.map(v=>`<span>VM-${v.id}</span><div class="tr">${s.slices.filter(x=>x.vm_id==v.id&&(x.end_t??s.clock)>lo).map(x=>{const a=Math.max(x.start_t,lo),e=x.end_t??s.clock;return `<b title="J-${x.job_id}: t=${x.start_t} to ${e}" style="left:${100*(a-lo)/span}%;width:${Math.max(100*(e-a)/span,1)}%;background:${PAL[x.job_id%8]}">J-${x.job_id}</b>`}).join('')}</div>`).join('')+`<div class="ax">${[0,1,2,3,4].map(i=>`<span>${Math.round(lo+span*i/4)}s</span>`).join('')}</div>`;
+ const C={running:'var(--green)',completed:'var(--brand)',waiting:'var(--amber)',rejected:'var(--red)'};
+ 
+ $('st').innerHTML=[['Database','Online'],['Hypervisor',s.vms.filter(v=>v.state=='running').length+'/'+s.vms.length+' VMs up'],['Docker engine',s.docker?'Online':'Simulated'],['Scheduler',s.algo],['Banker\'s check','Active']].map(([a,b])=>`<div><span>${a}</span><b>${b}</b></div>`).join('');
+ $('ct').innerHTML='<tr><th>Job<th>VM<th>Container ID<th>CPU limit<th>Memory limit<th>State</tr>'+(s.containers.map(c=>`<tr><td>J-${c.job_id}<td>VM-${c.vm_id}<td>${c.docker_id}<td>${c.cpu_limit} vCPU<td>${gb(c.mem_limit)} GB<td><span class="pill ${c.state=='running'?'running':'completed'}">${c.state}</span></tr>`).join('')||'<tr><td colspan=6 class="empty">No containers yet.</tr>');
+ recPanel();machine(s)}
+function machine(s){const R=Object.fromEntries(s.resources.map(r=>[r.name,r])),run=s.jobs.filter(j=>j.status=='running'),cells=[];run.forEach(j=>{for(let i=0;i<j.cpu;i++)cells.push(j)});
+ $('mh').textContent=`${R.cpu.used} of ${R.cpu.total} vCPU busy · ${s.algo}`+(s.algo=='RR'?' (quantum '+s.quantum+'s)':'');
+ let ch='';for(let i=0;i<R.cpu.total;i++){const j=cells[i];ch+=j?`<div class="core on" style="background:${PAL[j.id%8]}" title="J-${j.id} ${j.name}">J-${j.id}</div>`:'<div class="core">idle</div>'}$('cores').innerHTML=ch;
+ $('mem').innerHTML=run.map(j=>`<i style="width:${100*j.ram/R.ram.total}%;background:${PAL[j.id%8]}" title="J-${j.id}: ${gb(j.ram)} GB">J-${j.id}</i>`).join('');
+ $('rq').innerHTML=s.queue.map((id,i)=>{const j=s.jobs.find(x=>x.id==id);return `<span class="qc">${i==0?'next: ':''}J-${id} · ${j.cpu} vCPU · ${j.remaining}s · p${j.priority}</span>`}).join('')||'<span class="dl">Empty: every admitted job is running</span>';
+ const done=s.jobs.filter(j=>j.status=='completed'),ta=done.map(j=>j.end_time-j.arrival),av=a=>a.length?(a.reduce((x,y)=>x+y,0)/a.length).toFixed(1)+'s':'–';
+ $('ms').innerHTML=[['Context switches',s.ctx],['Avg wait',av(done.map((j,i)=>ta[i]-j.burst))],['Avg turnaround',av(ta)],['Completed',done.length]].map(([a,b])=>`<div>${a}<b>${b}</b></div>`).join('');
+ const lg=$('log'),end=lg.scrollTop+lg.clientHeight>=lg.scrollHeight-30;lg.innerHTML=s.events.map(e=>`<div class="${e.kind}"><span>[${String(e.t).padStart(4,'0')}]</span> ${e.msg}</div>`).join('');if(end)lg.scrollTop=lg.scrollHeight;
+ if(!hist.length||hist[hist.length-1][0]!==s.clock){hist.push([s.clock,Math.round(100*R.cpu.used/R.cpu.total),Math.round(100*R.ram.used/R.ram.total)]);if(hist.length>60)hist.shift()}
+ if(CH){if(!ut)ut=new Chart($('ut'),{type:'line',data:{labels:[],datasets:[{label:'CPU %',data:[],borderColor:cs('--brand'),borderWidth:2,tension:.3,pointRadius:0},{label:'RAM %',data:[],borderColor:cs('--violet'),borderWidth:2,tension:.3,pointRadius:0}]},options:{animation:false,maintainAspectRatio:false,scales:{y:{min:0,max:100},x:{grid:{display:false},ticks:{maxTicksLimit:6}}},plugins:{legend:{position:'top',align:'end',labels:{boxWidth:10,usePointStyle:true}}}}});
+  ut.data.labels=hist.map(x=>x[0]+'s');ut.data.datasets[0].data=hist.map(x=>x[1]);ut.data.datasets[1].data=hist.map(x=>x[2]);ut.update('none')}}
+function recPanel(){if(!best)return;$('rec').innerHTML=`<div class="dl">Recommended algorithm</div><div class="n">${best}</div><p>${NAMES[best]}</p>`+res.map(r=>`<div class="sc ${r.algorithm==best?'w':''}"><span>${r.algorithm}</span><span>${r.score.toFixed(2)}</span></div>`).join('')
+ +`<button class="p" ${S.algo==best?'disabled':''} onclick="post('/api/algo',{algo:'${best}'},'Applied ${best}')">${S.algo==best?'Currently active':'Apply '+best}</button>`}
+async function drawCmp(){try{const d=await (await fetch('/api/compare')).json();if(!d.best)return;best=d.best;res=d.results;recPanel();if(!CH)return;
+ const ds=[['avg_wait','Waiting','#d97706'],['avg_tat','Turnaround','#2563eb'],['avg_resp','Response','#7c3aed']].map(([k,n,c])=>({label:n,data:res.map(r=>+r[k].toFixed(2)),backgroundColor:c,borderRadius:4}));
+ cmp&&cmp.destroy();cmp=new Chart($('cmp'),{type:'bar',data:{labels:res.map(r=>r.algorithm),datasets:ds},options:{maintainAspectRatio:false,animation:false,plugins:{legend:{position:'top',align:'end',labels:{boxWidth:10,usePointStyle:true}}},scales:{y:{grid:{color:cs('--line')}},x:{grid:{display:false}}}}})}catch(e){}}
+async function poll(){try{render(await (await fetch('/api/state')).json());$('err').style.display='none'}catch(e){$('err').style.display='block'}}
+document.querySelectorAll('aside a').forEach(a=>a.onclick=()=>{document.querySelectorAll('aside a').forEach(x=>x.classList.remove('on'));a.classList.add('on')});
+let t0='light';try{t0=localStorage.getItem('cs-theme')||'light'}catch(e){}theme(t0);poll();setInterval(poll,1000);
+</script></body></html>

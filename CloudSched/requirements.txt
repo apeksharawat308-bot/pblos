@@ -1,0 +1,3 @@
+# Core runs on the Python standard library only.
+# Optional, for real containers (needs Docker daemon): pip install docker ; set CLOUDSCHED_DOCKER=1
+docker
